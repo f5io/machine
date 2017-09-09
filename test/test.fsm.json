@@ -1,0 +1,5 @@
+{
+  "init": { "from": "A", "to": "B" },
+  "effect": { "from": [ "A", "B", "D" ], "to": "C" },
+  "dispute": { "from": "C", "to": "D" }
+}

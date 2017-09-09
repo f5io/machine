@@ -1,0 +1,11 @@
+digraph "fsm" {
+  "A" [ label = " A " ];
+  "B" [ label = " B " ];
+  "D" [ label = " D " ];
+  "C" [ label = " C " ];
+  "A" -> "B" [ label = " init " ];
+  "A" -> "C" [ label = " effect " ];
+  "B" -> "C" [ label = " effect " ];
+  "D" -> "C" [ label = " effect " ];
+  "C" -> "D" [ label = " dispute " ];
+}

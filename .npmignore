@@ -1,0 +1,5 @@
+.nyc_output/
+assets/
+ci/
+coverage/
+test/

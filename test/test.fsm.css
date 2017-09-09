@@ -1,0 +1,42 @@
+.node {
+  style: bold,filled;
+  shape: circle;
+  fillcolor: #fedd00;
+  color: #fedd00;
+  fontsize: 8;
+  fontname: helvetica;
+}
+
+.node A {
+  color: #000000;
+  label: ' pending ';
+}
+
+.node B {
+  label: ' processing ';
+}
+
+.node C {
+  label: ' effected ';
+}
+
+.node D {
+  label: ' disputed ';
+}
+
+.edge {
+  fontsize: 8;
+  fontname: helvetica;
+  arrowsize: 0.5;
+  penwidth: 0.5;
+}
+
+.edge[A->B] {
+  arrowsize: 1;
+  penwidth: 2;
+  color: #cc0000;
+}
+
+.edge effect[A->C] {
+  arrowsize: 1;
+}
