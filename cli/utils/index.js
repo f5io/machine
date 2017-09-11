@@ -33,6 +33,9 @@ const edgesToString = (edges, styles) =>
     }, '')
     .slice(0, -1);
 
+const graphStyles = (styles) =>
+  Object.entries(styles[`.graph`] || {}).reduce((acc, [ k, v ]) => `  ${k}=${v};\n`, '');
+
 const required = (input) => {
   throw new Error(`Could not find required ${input}, your input may be malformed`);
 };
@@ -45,7 +48,8 @@ const fsmToDot = ({
 }) => {
   const stateStr = statesToString(states, styles);
   const edgeStr = edgesToString(edges, styles);
-  return `digraph "${name}" {\n${stateStr}\n${edgeStr}\n}`;
+  const graphStr = graphStyles(styles);
+  return `digraph "${name}" {\n${graphStr}\n${stateStr}\n${edgeStr}\n}`;
 };
 
 const exitOnError = (fn) => (...x) => {

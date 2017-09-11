@@ -1,3 +1,7 @@
+.graph {
+  rankdir: LR;
+}
+
 .node {
   style: bold,filled;
   shape: circle;
