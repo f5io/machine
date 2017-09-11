@@ -16,8 +16,9 @@ or
 $ yarn add @paybase/machine
 ```
 ### Concepts
+---
 
-##### State machine
+#### State machine
 
 With this library, a finite state machine is defined with an object containing a list of transitions, in the format:
 
@@ -46,7 +47,7 @@ onBeforeFoo -> onLeaveA -> onEnterB -> onB -> onFoo -> onAfterFoo
 
 These `handlers` are supplied the context that is used at initialisation of the machine. In contrast to lots of other state machine implementations, a state machine created by this library can be initialised in any state without it transitioning. This allows state machines to be wrapped over data structures at any time in their life-cycle.
 
-##### CLI
+#### CLI
 
 A command-line application is included within the package for creating svg diagrams of a defined state machine.
 
@@ -83,10 +84,11 @@ $ `npm bin`/visualise -i ./test/test.fsm.js -s ./test/test.fsm.css > ./test/test
 ![state machine](/test/test.fsm.svg)
 
 ### Example Usage
+---
 
 Below is a simple state machine implementation and how it could be used.
 
-##### Constructing the machine
+#### Constructing the machine
 
 Using the `createFSM` function, you can create a function that expects a `context`. Without a `context` the machine is not running.
 
@@ -130,7 +132,7 @@ const initMachine = createFSM({
 });
 ```
 
-##### Using the machine
+#### Using the machine
 
 Once you have created the `initMachine` function, you need to supply a `context`. This `context` must contain a valid state derived from the supplied `transitions` which lives on the `stateKey` within the `context`.
 
@@ -179,7 +181,7 @@ const machine = initMachine({
 })();
 ```
 
-##### Shortest path
+#### Shortest path
 
 The library also contains a mechanism for transitioning along a shortest path to a desired state.
 
@@ -210,8 +212,10 @@ const machine = initMachine({
 ```
 
 ### API
+---
 
 ### Contributions
+---
 
 Contributions are welcomed and appreciated!
 
