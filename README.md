@@ -17,7 +17,9 @@ $ yarn add @paybase/machine
 ```
 ### Concepts
 
-With this library, a finite state machine is defined with an object containing definitions of transitions, in the format:
+##### State machine
+
+With this library, a finite state machine is defined with an object containing a list of transitions, in the format:
 
 ```javascript
 {
@@ -42,13 +44,49 @@ For example, on a machines' transition from state `A` to state `B` over a tranit
 onBeforeFoo -> onLeaveA -> onEnterB -> onB -> onFoo -> onAfterFoo
 ```
 
-These `handlers` are supplied the context that is used at initialisation of the machine. In contrast to lots of other state machine implementations, a state machine created by this library can be initialised in any state without it transitioning. This allows state machines to be wrapped over data structures at any time in the life-cycle.
+These `handlers` are supplied the context that is used at initialisation of the machine. In contrast to lots of other state machine implementations, a state machine created by this library can be initialised in any state without it transitioning. This allows state machines to be wrapped over data structures at any time in their life-cycle.
+
+##### CLI
+
+A command-line application is included within the package for creating svg diagrams of a defined state machine.
+
+```
+$ `npm bin`/visualise --help
+
+  Usage: visualise [options]
+
+  a tool for outputting svgs from finite state machines
+
+  Options:
+
+    -V, --version         output the version number
+    -i, --input <value>   input to be visualised in the format .json, .js or .dot
+    -g, --graph <value>   supply a name for the graph
+    -f, --format <value>  output format, either .svg or .dot, defaults to .svg
+    -o, --output <value>  output to file, if none supplied will output to stdout
+    -s, --styles <value>  supply a css file of .dot styles
+    -h, --help            output usage information
+```
+
+Supported input types include:
+
+- `.js` files, which default export is a machine initialiser, ie. [see here](/test/test.fsm.js).
+- `.json` files, which define transitions for a machine, ie. [see here](/test/test.fsm.json).
+- `.dot` files, which define a graphviz representation of a graph, ie. [see here](/test/test.fsm.dot).
+
+Output can be either `.dot` or `.svg` and can be styled with a CSS-like syntax, [shown here](/test/test.fsm.css). Below is an example of the svg output of using the following command with examples from this repo.
+
+```
+$ `npm bin`/visualise -i ./test/test.fsm.js -s ./test/test.fsm.css > ./test/test.fsm.svg
+```
+
+![state machine](/test/test.fsm.svg?raw=true)
 
 ### Example Usage
 
 Below is a simple state machine implementation and how it could be used.
 
-#### Constructing the machine
+##### Constructing the machine
 
 Using the `createFSM` function, you can create a function that expects a `context`. Without a `context` the machine is not running.
 
@@ -92,7 +130,7 @@ const initMachine = createFSM({
 });
 ```
 
-#### Using the machine
+##### Using the machine
 
 Once you have created the `initMachine` function, you need to supply a `context`. This `context` must contain a valid state derived from the supplied `transitions` which lives on the `stateKey` within the `context`.
 
@@ -141,7 +179,7 @@ const machine = initMachine({
 })();
 ```
 
-#### Shortest path
+##### Shortest path
 
 The library also contains a mechanism for transitioning along a shortest path to a desired state.
 
