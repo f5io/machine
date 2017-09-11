@@ -80,7 +80,7 @@ Output can be either `.dot` or `.svg` and can be styled with a CSS-like syntax, 
 $ `npm bin`/visualise -i ./test/test.fsm.js -s ./test/test.fsm.css > ./test/test.fsm.svg
 ```
 
-![state machine](/test/test.fsm.svg?raw=true)
+![state machine](/test/test.fsm.svg)
 
 ### Example Usage
 
