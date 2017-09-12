@@ -114,7 +114,7 @@ const initMachine = createFSM({
        * you can mutate the context, however you will not
        * be able to directly mutate the `ctx[stateKey]`.
        */
-      ctx.hasInitted = true;
+      ctx.hasInitialised = true;
     },
     onEffect: async (ctx) => {
       /**
@@ -197,15 +197,15 @@ const machine = initMachine({
    * achieved ie. from the current state to the last in the arguments via the rest of the arguments.
    * The following `will` call is equivalent to `machine.will('B', 'C')`.
    */ 
-  if (machine.will('C')) { // the machine has found a path to `C` thru `B` from `A`
+  if (machine.will('D')) { // the machine has found a path to `D` thru `C` from `A`
     /**
      * `thru` is a default method that will enact a chain of state changes to reach the supplied
      * target state. It works in the same way as the `will` method.
      */
-    await machine.thru('C');
+    await machine.thru('D');
     /**
-     * The machine is now in state `C` having transitioned through every state on the way and passing
-     * through each of the handlers.
+     * The machine is now in state `D` having transitioned through every state on the way, in the
+     * shortest possible path and passing through each of the handlers.
      */
   }
 })();
