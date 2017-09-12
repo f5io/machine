@@ -32,7 +32,7 @@ A named `transition` defines an edge on a graph that allows a transition between
 Further to this, a state machine can be supplied with `handlers` which hook into the life-cycle of the machine. A state transition would flow through `handlers` in a particular order:
 
 ```
-onBefore{T} -> onLeave{CS} -> onEnter{TS} -> on{T} -> on{TS} -> onAfter{T}
+onBefore{T} -> onLeave{CS} -> on{T} -> onEnter{TS} -> on{TS} -> onAfter{T}
 ```
 
 Where `T` is equal to a `transition` name, `CS` is equal to the current state and `TS` is equal to the new target state.
@@ -40,7 +40,7 @@ Where `T` is equal to a `transition` name, `CS` is equal to the current state an
 For example, on a machines' transition from state `A` to state `B` over a tranition `foo`, the `handlers` order would fire like so:
 
 ```
-onBeforeFoo -> onLeaveA -> onEnterB -> onFoo -> onB -> onAfterFoo
+onBeforeFoo -> onLeaveA -> onFoo -> onEnterB -> onB -> onAfterFoo
 ```
 
 These `handlers` are supplied the context that is used at initialisation of the machine. In contrast to many other state machine implementations, a state machine created by this library can be initialised in any state without forced transitioning. This allows state machines to be wrapped over data structures at any time in their life-cycle.
