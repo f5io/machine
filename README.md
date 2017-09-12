@@ -37,7 +37,7 @@ onBefore{T} -> onLeave{CS} -> on{T} -> onEnter{TS} -> on{TS} -> onAfter{T}
 
 Where `T` is equal to a `transition` name, `CS` is equal to the current state and `TS` is equal to the new target state.
 
-For example, on a machines' transition from state `A` to state `B` over a tranition `foo`, the `handlers` order would fire like so:
+For example, on a machines' transition from state `A` to state `B` over a transition `foo`, the `handlers` order would fire like so:
 
 ```
 onBeforeFoo -> onLeaveA -> onFoo -> onEnterB -> onB -> onAfterFoo
@@ -211,6 +211,42 @@ const machine = initMachine({
 ```
 
 ## API
+
+The library exposes one function which is used to create a machine factory.
+
+#### `createMachineFactory({ stateKey = 'state', handlers = {}, transitions })` -> `MachineFactory`
+
+The machine factory creator takes an options object containing 3 properties:
+
+- `stateKey` - defaults to `'state'`, determines the key on which the state will be defined on the context
+- `handlers` - defaults to `{}`, defines optional life-cycle hooks for the machine
+- `transitions` - required, defines transitions keyed by name containing `from`/`to` attributes of the type `string|array<string>`
+
+A machine factory is returned which is used to initialise a machine. 
+
+#### `machineFactory(context)` -> `Machine`
+
+This function requires a `context` object to be passed in. It will check whether a valid state is defined at `context[stateKey]` (see above).
+
+The returned `Machine` will contain the following default methods:
+
+- `Machine.can(to)` -> `Boolean` - The `can` method takes a state to transition to and will return a `Boolean` as to whether the machine can transition directly to that state
+- `Machine.to(to)` -> `Promise` - The `to` method will attempt to transition the machine to the supplied state, otherwise will throw an error if unavailable
+- `Machine.edge(to)` -> `string` - The `edge` method will return the name of the transition that fulfils the transtion to the supplied state, otherwise will throw an error if none is available
+- `Machine.will(...to)` -> `Boolean` - The `will` method takes any number of states and attempts to find a shortest path between the current state and each state supplied, eventually ending at the last supplied state, returning a `Boolean`
+- `Machine.thru(...to)` -> `Promise` - The `thru` method, similarly to the `will` method, takes any number of states and attempts to find a shortest path between the current state and each state supplied, eventually ending at the last supplied state, then enacts the change to the machine
+- `Machine.transitions` -> `array<string>` - The `transitions` methods will return an array of all available transition names from the current state
+
+The `Machine` also will contain methods that are derived from the `transitions` object passed to the `createMachineFactory` function. For example, given the transitions object:
+
+```
+{
+  foo: { from: 'A', to: 'B' },
+  bar: { from: 'B', to: 'C' },
+}
+```
+
+The `Machine` will have both a `foo` and a `bar` method which both return a `Promise` and, once called, enact that transition on the machine.
 
 ## Contributions
 
