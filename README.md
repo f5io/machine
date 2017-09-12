@@ -234,7 +234,7 @@ The returned `Machine` will contain the following default methods:
 - `Machine.to(to)` -> `Promise` - The `to` method will attempt to transition the machine to the supplied state, otherwise will throw an error if unavailable
 - `Machine.edge(to)` -> `string` - The `edge` method will return the name of the transition that fulfils the transtion to the supplied state, otherwise will throw an error if none is available
 - `Machine.will(...to)` -> `Boolean` - The `will` method takes any number of states and attempts to find a shortest path between the current state and each state supplied, eventually ending at the last supplied state, returning a `Boolean`
-- `Machine.thru(...to)` -> `Promise` - The `thru` method, similarly to the `will` method, takes any number of states and attempts to find a shortest path between the current state and each state supplied, eventually ending at the last supplied state, then enacts the change to the machine
+- `Machine.thru(...to)` -> `Promise` - The `thru` method, similarly to the `will` method, takes any number of states and attempts to find a shortest path between the current state and each state supplied, eventually ending at the last supplied state, then enacts the change to the machine by transitioning through all the states
 - `Machine.transitions` -> `array<string>` - The `transitions` methods will return an array of all available transition names from the current state
 
 The `Machine` also will contain methods that are derived from the `transitions` object passed to the `createMachineFactory` function. For example, given the transitions object:
