@@ -45,47 +45,49 @@ onBeforeFoo -> onLeaveA -> onFoo -> onEnterB -> onB -> onAfterFoo
 
 These `handlers` are supplied the context that is used at initialisation of the machine. In contrast to many other state machine implementations, a state machine created by this library can be initialised in any state without forced transitioning. This allows state machines to be wrapped over data structures at any time in their life-cycle.
 
-## CLI
+## API
 
-A command-line application is included within the package for creating svg diagrams of a defined state machine.
+The library exposes one function which is used to create a machine factory.
+
+#### `createMachineFactory({ stateKey = 'state', handlers = {}, transitions })` -> `MachineFactory`
+
+The machine factory creator takes an options object containing 3 properties:
+
+- `stateKey` - defaults to `'state'`, determines the key on which the state will be defined on the context
+- `handlers` - defaults to `{}`, defines optional life-cycle hooks for the machine
+- `transitions` - required, defines transitions keyed by name containing `from`/`to` attributes of the type `string|array<string>`
+
+A machine factory is returned which is used to initialise a machine. 
+
+#### `machineFactory(context)` -> `Machine`
+
+This function requires a `context` object to be passed in. It will check whether a valid state is defined at `context[stateKey]` (see above).
+
+The returned `Machine` will contain the following default methods:
+
+- `Machine.can(to)` -> `Boolean` - The `can` method takes a state to transition to and will return a `Boolean` as to whether the machine can transition directly to that state
+- `Machine.to(to)` -> `Promise` - The `to` method will attempt to transition the machine to the supplied state, otherwise will throw an error if unavailable
+- `Machine.edge(to)` -> `string` - The `edge` method will return the name of the transition that fulfils the transtion to the supplied state, otherwise will throw an error if none is available
+- `Machine.will(...to)` -> `Boolean` - The `will` method takes any number of states and attempts to find a shortest path between the current state and each state supplied, eventually ending at the last supplied state, returning a `Boolean`
+- `Machine.thru(...to)` -> `Promise` - The `thru` method, similarly to the `will` method, takes any number of states and attempts to find a shortest path between the current state and each state supplied, eventually ending at the last supplied state, then enacts the change to the machine by transitioning through all the states
+- `Machine.transitions` -> `array<string>` - The `transitions` methods will return an array of all available transition names from the current state
+
+The `Machine` also will contain methods that are derived from the `transitions` object passed to the `createMachineFactory` function. For example, given the transitions object:
 
 ```
-$ `npm bin`/visualise --help
-
-  Usage: visualise [options]
-
-  a tool for outputting svgs from finite state machines
-
-  Options:
-
-    -V, --version         output the version number
-    -i, --input <value>   input to be visualised in the format .json, .js or .dot
-    -g, --graph <value>   supply a name for the graph
-    -f, --format <value>  output format, either .svg or .dot, defaults to .svg
-    -o, --output <value>  output to file, if none supplied will output to stdout
-    -s, --styles <value>  supply a css file of .dot styles
-    -h, --help            output usage information
+{
+  foo: { from: 'A', to: 'B' },
+  bar: { from: 'B', to: 'C' },
+}
 ```
 
-Supported input types include:
+The `Machine` will have both a `foo` and a `bar` method which both return a `Promise` and, once called, enact that transition on the machine.
 
-- `.js` files, which default export is a machine initialiser, ie. [see here](/test/test.fsm.js).
-- `.json` files, which define transitions for a machine, ie. [see here](/test/test.fsm.json).
-- `.dot` files, which define a graphviz representation of a graph, ie. [see here](/test/test.fsm.dot).
-
-Output can be either `.dot` or `.svg` and can be styled with a CSS-like syntax, [shown here](/test/test.fsm.css). Below is an example of the svg output of using the following command with examples from this repo.
-
-```
-$ `npm bin`/visualise -i ./test/test.fsm.js -s ./test/test.fsm.css > ./test/test.fsm.svg
-```
-
-![state machine](/test/test.fsm.svg)
-
-### Example Usage
+## Example Usage
 
 Below is a simple state machine example and how it could be used.
 
-#### Constructing the machine
+### Constructing the machine
 
 The `createMachineFactory` function expects a configuration object that contains the parameters for the state machine including transitions and life-cycle behaviour. This function will return a factory method (`machineFactory` below) that, when called, will create an instantiated instance of the defined state machine with a given context.
 
@@ -142,7 +144,7 @@ const machine = machineFactory({
 });
 ```
 
-### Transitioning states
+### Transitioning states
 
 The machine is now constructed and has some default methods, plus methods that are derived from your `transition` names.
 
@@ -180,7 +182,7 @@ The machine is now constructed and has some default methods, plus methods that a
 })();
 ```
 
-### Shortest path
+### Shortest path transitions
 
 The library also contains a mechanism for transitioning along a shortest path to a desired state.
 
@@ -210,43 +212,41 @@ const machine = initMachine({
 })();
 ```
 
-## API
+## CLI
 
-The library exposes one function which is used to create a machine factory.
-
-#### `createMachineFactory({ stateKey = 'state', handlers = {}, transitions })` -> `MachineFactory`
-
-The machine factory creator takes an options object containing 3 properties:
-
-- `stateKey` - defaults to `'state'`, determines the key on which the state will be defined on the context
-- `handlers` - defaults to `{}`, defines optional life-cycle hooks for the machine
-- `transitions` - required, defines transitions keyed by name containing `from`/`to` attributes of the type `string|array<string>`
-
-A machine factory is returned which is used to initialise a machine. 
-
-#### `machineFactory(context)` -> `Machine`
-
-This function requires a `context` object to be passed in. It will check whether a valid state is defined at `context[stateKey]` (see above).
-
-The returned `Machine` will contain the following default methods:
-
-- `Machine.can(to)` -> `Boolean` - The `can` method takes a state to transition to and will return a `Boolean` as to whether the machine can transition directly to that state
-- `Machine.to(to)` -> `Promise` - The `to` method will attempt to transition the machine to the supplied state, otherwise will throw an error if unavailable
-- `Machine.edge(to)` -> `string` - The `edge` method will return the name of the transition that fulfils the transtion to the supplied state, otherwise will throw an error if none is available
-- `Machine.will(...to)` -> `Boolean` - The `will` method takes any number of states and attempts to find a shortest path between the current state and each state supplied, eventually ending at the last supplied state, returning a `Boolean`
-- `Machine.thru(...to)` -> `Promise` - The `thru` method, similarly to the `will` method, takes any number of states and attempts to find a shortest path between the current state and each state supplied, eventually ending at the last supplied state, then enacts the change to the machine by transitioning through all the states
-- `Machine.transitions` -> `array<string>` - The `transitions` methods will return an array of all available transition names from the current state
-
-The `Machine` also will contain methods that are derived from the `transitions` object passed to the `createMachineFactory` function. For example, given the transitions object:
+A command-line application is included within the package for creating svg diagrams of a defined state machine.
 
 ```
-{
-  foo: { from: 'A', to: 'B' },
-  bar: { from: 'B', to: 'C' },
-}
+$ `npm bin`/visualise --help
+
+  Usage: visualise [options]
+
+  a tool for outputting svgs from finite state machines
+
+  Options:
+
+    -V, --version         output the version number
+    -i, --input <value>   input to be visualised in the format .json, .js or .dot
+    -g, --graph <value>   supply a name for the graph
+    -f, --format <value>  output format, either .svg or .dot, defaults to .svg
+    -o, --output <value>  output to file, if none supplied will output to stdout
+    -s, --styles <value>  supply a css file of .dot styles
+    -h, --help            output usage information
 ```
 
-The `Machine` will have both a `foo` and a `bar` method which both return a `Promise` and, once called, enact that transition on the machine.
+Supported input types include:
+
+- `.js` files, which default export is a machine initialiser, ie. [see here](/test/test.fsm.js).
+- `.json` files, which define transitions for a machine, ie. [see here](/test/test.fsm.json).
+- `.dot` files, which define a graphviz representation of a graph, ie. [see here](/test/test.fsm.dot).
+
+Output can be either `.dot` or `.svg` and can be styled with a CSS-like syntax, [shown here](/test/test.fsm.css). Below is an example of the svg output of using the following command with examples from this repo.
+
+```
+$ `npm bin`/visualise -i ./test/test.fsm.js -s ./test/test.fsm.css > ./test/test.fsm.svg
+```
+
+![state machine](/test/test.fsm.svg)
 
 ## Contributions
 
