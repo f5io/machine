@@ -34,7 +34,7 @@ A named `transition` defines an edge on a graph that allows a transition between
 Further to this, a state machine can be supplied with `handlers` which hook into the life-cycle of the machine. A state transition would flow through `handlers` in a particular order:
 
 ```
-onBefore{T} -> onLeave{SA} -> on{SB} -> onEnter{SB} -> on{T} -> onAfter{T} 
+onBefore{T} -> onLeave{SA} -> onEnter{SB} -> on{SB} -> on{T} -> onAfter{T} 
 ```
 
 Where `T` is equal to a `transition` name, `SA` is equal to the current state and `SB` is equal to the new target state.
