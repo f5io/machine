@@ -1,4 +1,4 @@
-const createFSM = require('../');
+const createMachineFactory = require('../');
 const transitions = require('./test.fsm.json');
 
-module.exports = createFSM({ transitions });
+module.exports = createMachineFactory({ transitions });

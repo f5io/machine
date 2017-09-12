@@ -1,6 +1,6 @@
 const test = require('tape');
 const sinon = require('sinon');
-const createFSM = require('../');
+const createMachineFactory = require('../');
 
 test('[ factory ] - simple state machine', async t => {
 
@@ -15,7 +15,7 @@ test('[ factory ] - simple state machine', async t => {
 
   const handlers = { onEnterA, onLeaveA, onEnterC };
 
-  const fsm = createFSM({ transitions, handlers });
+  const fsm = createMachineFactory({ transitions, handlers });
 
   t.throws(() => fsm({ state: 'D' }), /Invalid initial state/, 'should throw an error when initializing with an invalid state');
   t.throws(() => fsm(), /Invalid initial state/, 'should throw an error when initializing with an invalid state');
@@ -57,6 +57,44 @@ test('[ factory ] - simple state machine', async t => {
 
 });
 
+test('[ factory ] - handler order', async t => {
+
+  const transitions = {
+    init: { from: 'A', to: 'B' },
+    effect: { from: [ 'A', 'B', 'D' ], to: 'C' },
+    dispute: { from: 'C', to: 'D' },
+  };
+
+  const append = val => ctx => ctx.order.push(val);
+  const handlers = {
+    onBeforeInit: append('onBeforeInit'),
+    onLeaveA: append('onLeaveA'),
+    onInit: append('onInit'),
+    onEnterB: append('onEnterB'),
+    onB: append('onB'),
+    onAfterInit: append('onAfterInit'),
+  };
+
+  const fsm = createMachineFactory({ transitions, handlers });
+  const machine = fsm({ state: 'A', order: [] });
+
+  const expectedOrder = [
+    'onBeforeInit',
+    'onLeaveA',
+    'onInit',
+    'onEnterB',
+    'onB',
+    'onAfterInit',
+  ];
+
+  await machine.to('B');
+
+  t.deepEquals(machine.order, expectedOrder, 'life-cycle hooks should happen in the correct order');
+
+  t.end();
+
+});
+
 test('[ factory ] - thru mechanisms', async t => {
 
   const transitions = {
@@ -69,7 +107,7 @@ test('[ factory ] - thru mechanisms', async t => {
   const onEffect = sinon.spy();
   const onDispute = sinon.spy();
 
-  const fsm = createFSM({ transitions, handlers: { onInit, onEffect, onDispute } });
+  const fsm = createMachineFactory({ transitions, handlers: { onInit, onEffect, onDispute } });
   const machine = fsm({ state: 'A' });
 
   t.ok(machine.will('D'), 'should be able to transition thru to D');
@@ -112,9 +150,9 @@ test('[ factory ] - other args', async t => {
     reset: { from: [ 'B', 'C' ], to: 'A' },
   };
 
-  t.throws(() => createFSM(), /No transitions supplied/, 'should error as no transitions are supplied to factory');
+  t.throws(() => createMachineFactory(), /No transitions supplied/, 'should error as no transitions are supplied to factory');
 
-  const fsm = createFSM({ transitions, stateKey: 'beam' });
+  const fsm = createMachineFactory({ transitions, stateKey: 'beam' });
 
   t.throws(() => fsm({ state: 'A' }), /Invalid initial state/, 'should error as not state is supplied on the stateKey');
 

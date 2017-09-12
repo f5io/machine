@@ -10,14 +10,18 @@ const _edges = Symbol.for('@@fsm/edges');
 const _states = Symbol.for('@@fsm/states');
 
 const createSetter = (ctx, stateKey, map) =>
-  val => {
-    const uVal = enforceUppercase(val);
-    const cVal = enforceUppercase(ctx[stateKey]);
+  (val, transition) => {
+    const newState = enforceUppercase(val);
+    const oldState = enforceUppercase(ctx[stateKey]);
+    const transitionName = enforceUppercase(transition);
     return sequence(
-      () => map[`onLeave${cVal}`](ctx),
+      () => map[`onBefore${transitionName}`](ctx),
+      () => map[`onLeave${oldState}`](ctx),
+      () => map[`on${transitionName}`](ctx),
       () => ctx[stateKey] = [ lock, val ],
-      () => map[`onEnter${uVal}`](ctx),
-      () => map[`on${uVal}`](ctx)
+      () => map[`onEnter${newState}`](ctx),
+      () => map[`on${newState}`](ctx),
+      () => map[`onAfter${transitionName}`](ctx),
     );
   };
 
@@ -116,7 +120,7 @@ const prepareDefaultMethods = (edges, stateKey) => {
 const checkInitialState = (states, stateKey) =>
   ctx => states.includes(ctx[stateKey]);
 
-const createFSM = ({ transitions, handlers = {}, stateKey = 'state' } = {}) => {
+const createMachineFactory = ({ transitions, handlers = {}, stateKey = 'state' } = {}) => {
   if (!transitions)
     throw new Error('No transitions supplied');
 
@@ -136,16 +140,10 @@ const createFSM = ({ transitions, handlers = {}, stateKey = 'state' } = {}) => {
 
     const fsm = transit.reduce((acc, name) =>
       (acc[name] = () => {
-        const uName = enforceUppercase(name);
         const transition = edges[name].find(([ from ]) => from === ctx[stateKey]);
         if (!transition)
           throw new Error('Invalid transition');
-        return sequence(
-          () => map[`onBefore${uName}`](ctx),
-          () => setter(transition[1]),
-          () => map[`on${uName}`](ctx),
-          () => map[`onAfter${uName}`](ctx)
-        );
+        return setter(transition[1], name);
       }, acc), createDefaultMethods(ctx));
 
     return Object.assign(ctx, fsm);
@@ -157,4 +155,4 @@ const createFSM = ({ transitions, handlers = {}, stateKey = 'state' } = {}) => {
   return init;
 };
 
-module.exports = createFSM;
+module.exports = createMachineFactory;
