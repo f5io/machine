@@ -195,7 +195,7 @@ const machine = initMachine({
    * `will` is a default method that takes a variadic number of states to pass thru
    * on it's way to the target state, and will return a boolean as to whether the transition can be
    * achieved ie. from the current state to the last in the arguments via the rest of the arguments.
-   * The following `will` call is equivalent to `machine.will('B', 'C')`.
+   * The following `will` call is equivalent to `machine.will('C', 'D')`.
    */ 
   if (machine.will('D')) { // the machine has found a path to `D` thru `C` from `A`
     /**
