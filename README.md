@@ -1,10 +1,12 @@
 # @paybase/machine
 
-An asynchronous finite state machine library.
+An asynchronous finite state machine library for Node.js and the browser.
+
+[![npm version](https://badge.fury.io/js/%40paybase%2Fmachine.svg)](https://badge.fury.io/js/%40paybase%2Fmachine)
 
 ## Installation
 
-This library requires `async/await` and `Proxy` support in your environment, so ideally `node>=7.4`.
+This library requires `async/await` and `Proxy` support in your Node.js runtime, so ideally `node>=7.4`.
 
 ```
 $ npm install --save @paybase/machine
