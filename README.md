@@ -2,7 +2,7 @@
 
 An asynchronous finite state machine library.
 
-### Installation
+## Installation
 
 This library requires `async/await` and `Proxy` support in your environment, so ideally `node>=7.4`.
 
@@ -15,10 +15,8 @@ or
 ```
 $ yarn add @paybase/machine
 ```
-### Concepts
----
 
-#### State machine
+## Concepts
 
 With this library, a finite state machine is defined with an object containing a list of transitions, in the format:
 
@@ -34,20 +32,20 @@ A named `transition` defines an edge on a graph that allows a transition between
 Further to this, a state machine can be supplied with `handlers` which hook into the life-cycle of the machine. A state transition would flow through `handlers` in a particular order:
 
 ```
-onBefore{T} -> onLeave{SA} -> onEnter{SB} -> on{SB} -> on{T} -> onAfter{T} 
+onBefore{T} -> onLeave{CS} -> onEnter{TS} -> on{T} -> on{TS} -> onAfter{T}
 ```
 
-Where `T` is equal to a `transition` name, `SA` is equal to the current state and `SB` is equal to the new target state.
+Where `T` is equal to a `transition` name, `CS` is equal to the current state and `TS` is equal to the new target state.
 
 For example, on a machines' transition from state `A` to state `B` over a tranition `foo`, the `handlers` order would fire like so:
 
 ```
-onBeforeFoo -> onLeaveA -> onEnterB -> onB -> onFoo -> onAfterFoo
+onBeforeFoo -> onLeaveA -> onEnterB -> onFoo -> onB -> onAfterFoo
 ```
 
-These `handlers` are supplied the context that is used at initialisation of the machine. In contrast to lots of other state machine implementations, a state machine created by this library can be initialised in any state without it transitioning. This allows state machines to be wrapped over data structures at any time in their life-cycle.
+These `handlers` are supplied the context that is used at initialisation of the machine. In contrast to many other state machine implementations, a state machine created by this library can be initialised in any state without forced transitioning. This allows state machines to be wrapped over data structures at any time in their life-cycle.
 
-#### CLI
+## CLI
 
 A command-line application is included within the package for creating svg diagrams of a defined state machine.
 
@@ -84,16 +82,15 @@ $ `npm bin`/visualise -i ./test/test.fsm.js -s ./test/test.fsm.css > ./test/test
 ![state machine](/test/test.fsm.svg)
 
 ### Example Usage
----
 
-Below is a simple state machine implementation and how it could be used.
+Below is a simple state machine example and how it could be used.
 
 #### Constructing the machine
 
-Using the `createFSM` function, you can create a function that expects a `context`. Without a `context` the machine is not running.
+The `createMachineFactory` function expects a configuration object that contains the parameters for the state machine including transitions and life-cycle behaviour. This function will return a factory method (`machineFactory` below) that, when called, will create an instantiated instance of the defined state machine with a given context.
 
 ```javascript
-const initMachine = createFSM({
+const machineFactory = createMachineFactory({
   /**
    * The transitions describe all the states the machines can be in
    * and the transitions available between those states.
@@ -132,22 +129,24 @@ const initMachine = createFSM({
 });
 ```
 
-#### Using the machine
+### Using the `machineFactory`
 
-Once you have created the `initMachine` function, you need to supply a `context`. This `context` must contain a valid state derived from the supplied `transitions` which lives on the `stateKey` within the `context`.
+Once you have created your `machineFactory` function, you can instantiate instances of your machine with a given `context` object. This `context` object must contain the attribute defined by `stateKey` in the `createMachineFactory` method, and the value of this key must be a valid state (as derived from the supplied `transitions`).
 
 ```javascript
-const machine = initMachine({
+const machine = machineFactory({
   stateId: 'A',
   anything: 'canBeSupplied',
   functionality: () => 'foo',
   etc: [ 1, 2, 3 ],
 });
+```
 
-/**
- * The machine is now constructed and has some default methods,
- * plus methods that are derived from your `transition` names.
- */
+### Transitioning states
+
+The machine is now constructed and has some default methods, plus methods that are derived from your `transition` names.
+
+```javascript
 (async () => {
   /**
    * `can` is a default method which takes a state and will
@@ -181,7 +180,7 @@ const machine = initMachine({
 })();
 ```
 
-#### Shortest path
+### Shortest path
 
 The library also contains a mechanism for transitioning along a shortest path to a desired state.
 
@@ -211,11 +210,9 @@ const machine = initMachine({
 })();
 ```
 
-### API
----
+## API
 
-### Contributions
----
+## Contributions
 
 Contributions are welcomed and appreciated!
 
@@ -225,6 +222,6 @@ Contributions are welcomed and appreciated!
 
 Feel free to get in touch if you have any questions.
 
-### License
+## License
 
 Please see the `LICENSE` file for more information.
