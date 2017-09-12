@@ -81,11 +81,11 @@ $ `npm bin`/visualise -i ./test/test.fsm.js -s ./test/test.fsm.css > ./test/test
 
 ![state machine](/test/test.fsm.svg)
 
-### Example Usage
+## Example Usage
 
 Below is a simple state machine example and how it could be used.
 
-#### Constructing the machine
+### Constructing the machine
 
 The `createMachineFactory` function expects a configuration object that contains the parameters for the state machine including transitions and life-cycle behaviour. This function will return a factory method (`machineFactory` below) that, when called, will create an instantiated instance of the defined state machine with a given context.
 
@@ -142,7 +142,7 @@ const machine = machineFactory({
 });
 ```
 
-### Transitioning states
+### Transitioning states
 
 The machine is now constructed and has some default methods, plus methods that are derived from your `transition` names.
 
@@ -180,7 +180,7 @@ The machine is now constructed and has some default methods, plus methods that a
 })();
 ```
 
-### Shortest path
+### Shortest path transitions
 
 The library also contains a mechanism for transitioning along a shortest path to a desired state.
 
