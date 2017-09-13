@@ -21,7 +21,7 @@ const createSetter = (ctx, stateKey, map) =>
       () => ctx[stateKey] = [ lock, val ],
       () => map[`onEnter${newState}`](ctx),
       () => map[`on${newState}`](ctx),
-      () => map[`onAfter${transitionName}`](ctx),
+      () => map[`onAfter${transitionName}`](ctx)
     );
   };
 
