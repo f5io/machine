@@ -28,6 +28,9 @@ const getJoins = (edges) =>
       ? acc.get(from).concat(to)
       : [ to ]), new Map()).entries() ];
 
+const getSequence = paths =>
+  paths.reduce((acc, p) => acc.concat(p.slice(1)), paths[0].slice(0, 1));
+
 const getStates = transitions =>
   Object.values(transitions).reduce((acc, { from, to }) =>
     unique(acc.concat(...toArray(from), ...toArray(to))), []);
@@ -48,6 +51,7 @@ exports.compose = compose;
 exports.sequence = sequence;
 exports.getPairs = getPairs;
 exports.getJoins = getJoins;
+exports.getSequence = getSequence;
 exports.getStates = getStates;
 exports.getEdges = getEdges;
 exports.getAllEdges = getAllEdges;
@@ -61,6 +65,7 @@ module.exports = {
   sequence,
   getPairs,
   getJoins,
+  getSequence,
   getStates,
   getEdges,
   getAllEdges,

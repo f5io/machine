@@ -138,6 +138,8 @@ test('[ factory ] - thru mechanisms', async t => {
   t.notOk(machine3.will('C'), 'should not allow a potential cyclic transition');
   t.throws(() => machine3.thru('C'), /Potential cyclic transition/, 'should throw a potential cyclic transition');
   t.ok(machine3.will('D', 'C'), 'should be able to do a cyclic transition if an extra node is supplied');
+  t.notOk(machine3.path('C'), 'should not return path pairs for a potentially cyclical transition');
+  t.deepEquals(machine3.path('D', 'C'), [ ['C', 'D'], ['D', 'C'] ], 'should return path pairs for a valid transition');
 
   t.end();
 
