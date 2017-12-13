@@ -1,6 +1,6 @@
 const {
   compose, sequence, map,
-  getJoins, getPairs,
+  getJoins, getPairs, getSequence,
   getStates, getEdges, getAllEdges,
   enforceUppercase, first, last,
 } = require('./utils');
@@ -64,23 +64,28 @@ const createFinder = (edges) => ([ from, to ]) =>
 const prepareThru = (finder, allEdges, stateKey) => {
   const joins = getJoins(allEdges);
   const recurse = shortestPath(joins);
-  const getPaths = compose(map(x => recurse(...x)), getPairs);
-  const getNames = compose(map(x => finder(x).shift()), getPairs);
+ 
+  // if a path is found, get pairs of the sequence, ie. [ [ A, B ], [ B, C ] ]
+  const getPathPairs = x => !x.some(y => y === undefined)
+    ? getPairs(getSequence(x))
+    : false;
 
-  return (ctx) => (...states) => {
+  const getPaths = compose(getPathPairs, map(x => recurse(...x)), getPairs);
+  const getNames = map(x => finder(x).shift());
+
+  // taking into account the current state and supplied thru states, get pairs for the sequence
+  const statesToPairs = ctx => (...states) => {
     const s = [ ctx[stateKey], ...states ];
-
     if (first(s) === last(s) && s.length === 2)
       return false;
+    return getPaths(s);
+  };
 
-    const paths = getPaths(s);
-    if (paths.some(x => x === undefined))
-      return false;
-
-    return getNames(
-      paths.reduce((acc, p) =>
-        acc.concat(p.slice(1)), s.slice(0, 1))
-    );
+  return (ctx) => {
+    const stp = statesToPairs(ctx);
+    const thru = compose(x => x && getNames(x), stp);
+    thru.path = stp;
+    return thru;
   };
 };
 
@@ -112,6 +117,7 @@ const prepareDefaultMethods = (edges, stateKey) => {
         if (!names) throw new Error('Invalid transition');
         return sequence(...names.map(x => this[x]));
       },
+      path: (...to) => thru.path(...to),
       transitions: () => Object.keys(edges).filter(k => edges[k].find(([ x ]) => x === ctx[stateKey])),
     };
   };
