@@ -51,13 +51,14 @@ These `handlers` are supplied the context that is used at initialisation of the 
 
 The library exposes one function which is used to create a machine factory.
 
-#### `createMachineFactory({ stateKey = 'state', handlers = {}, transitions })` -> `MachineFactory`
+#### `createMachineFactory({ stateKey = 'state', allowCyclicalTransitions = false, handlers = {}, transitions })` -> `MachineFactory`
 
 The machine factory creator takes an options object containing 3 properties:
 
 - `stateKey` - defaults to `'state'`, determines the key on which the state will be defined on the context
+- `allowCyclicalTransitions` - defaults to `false`, determines whether the machine should allow cyclical transitions
 - `handlers` - defaults to `{}`, defines optional life-cycle hooks for the machine
-- `transitions` - required, defines transitions keyed by name containing `from`/`to` attributes of the type `string|array<string>`
+- `transitions` - required, defines transitions keyed by name containing `from`/`to` attributes of the type `string|number|array<string|number>`
 
 A machine factory is returned which is used to initialise a machine. 
 

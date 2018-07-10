@@ -61,7 +61,7 @@ const createFinder = (edges) => ([ from, to ]) =>
   Object.keys(edges)
     .filter(k => edges[k].find(([ x, y ]) => x === from && y === to));
 
-const prepareThru = (finder, allEdges, stateKey) => {
+const prepareThru = (finder, allEdges, stateKey, allowCyclicalTransitions) => {
   const joins = getJoins(allEdges);
   const recurse = shortestPath(joins);
  
@@ -76,8 +76,11 @@ const prepareThru = (finder, allEdges, stateKey) => {
   // taking into account the current state and supplied thru states, get pairs for the sequence
   const statesToPairs = ctx => (...states) => {
     const s = [ ctx[stateKey], ...states ];
-    if (first(s) === last(s) && s.length === 2)
-      return false;
+    if (
+      !allowCyclicalTransitions
+      && first(s) === last(s)
+      && s.length === 2
+    ) return false;
     return getPaths(s);
   };
 
@@ -89,10 +92,10 @@ const prepareThru = (finder, allEdges, stateKey) => {
   };
 };
 
-const prepareDefaultMethods = (edges, stateKey) => {
+const prepareDefaultMethods = (edges, stateKey, allowCyclicalTransitions) => {
   const finder = createFinder(edges);
   const allEdges = getAllEdges(edges);
-  const createThru = prepareThru(finder, allEdges, stateKey);
+  const createThru = prepareThru(finder, allEdges, stateKey, allowCyclicalTransitions);
   return (ctx) => {
     const thru = createThru(ctx);
     return {
@@ -110,8 +113,11 @@ const prepareDefaultMethods = (edges, stateKey) => {
       will: (...to) => !!thru(...to),
       thru(...to) {
         const s = [ ctx[stateKey], ...to ];
-        if (first(s) === last(s) && s.length === 2)
-          throw new Error('Potential cyclic transition');
+        if (
+          !allowCyclicalTransitions
+          && first(s) === last(s)
+          && s.length === 2
+        ) throw new Error('Potential cyclic transition');
 
         const names = thru(...to);
         if (!names) throw new Error('Invalid transition');
@@ -126,7 +132,12 @@ const prepareDefaultMethods = (edges, stateKey) => {
 const checkInitialState = (states, stateKey) =>
   ctx => states.includes(ctx[stateKey]);
 
-const createMachineFactory = ({ transitions, handlers = {}, stateKey = 'state' } = {}) => {
+const createMachineFactory = ({
+  transitions,
+  handlers = {},
+  stateKey = 'state',
+  allowCyclicalTransitions = false
+} = {}) => {
   if (!transitions)
     throw new Error('No transitions supplied');
 
@@ -135,7 +146,7 @@ const createMachineFactory = ({ transitions, handlers = {}, stateKey = 'state' }
   const edges = getEdges(transitions);
   const transit = Object.keys(edges);
   const check = checkInitialState(states, stateKey);
-  const createDefaultMethods = prepareDefaultMethods(edges, stateKey);
+  const createDefaultMethods = prepareDefaultMethods(edges, stateKey, allowCyclicalTransitions);
 
   const init = (context = {}) => {
     if (!check(context))
