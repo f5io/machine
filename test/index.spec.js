@@ -145,6 +145,27 @@ test('[ factory ] - thru mechanisms', async t => {
 
 });
 
+test('[ factory ] - allow cyclical transitions', async t => {
+    
+  const transitions = {
+    cycle: { from: 'A', to: 'A' },
+  };
+
+  const onEnterA = sinon.spy();
+
+  const fsm = createMachineFactory({ transitions, handlers: { onEnterA }, allowCyclicalTransitions: true });
+  const machine = fsm({ state: 'A' });
+  t.ok(machine.will('A'), 'should allow cyclic transitions if allowed by the machine factory');
+  t.deepEquals(machine.path('A'), [ ['A', 'A'] ], 'should return path pairs for a valid transition');
+
+  await machine.thru('A');
+
+  t.ok(onEnterA.calledOnce, 'should call the on enter A handler once');
+
+  t.end();
+  
+});
+
 test('[ factory ] - other args', async t => {
 
   const transitions = {
