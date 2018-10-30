@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: node:slim
+      - image: node:alpine
     working_directory: /paybase
     steps:
       - checkout
