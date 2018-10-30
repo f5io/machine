@@ -17,7 +17,7 @@
   "license": "MIT",
   "devDependencies": {
     "nyc": "^11.1.0",
-    "sinon": "^3.2.1",
+    "sinon": "^7.1.0",
     "tape": "^4.8.0"
   },
   "dependencies": {
