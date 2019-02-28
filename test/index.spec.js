@@ -139,14 +139,14 @@ test('[ factory ] - thru mechanisms', async t => {
   t.throws(() => machine3.thru('C'), /Potential cyclic transition/, 'should throw a potential cyclic transition');
   t.ok(machine3.will('D', 'C'), 'should be able to do a cyclic transition if an extra node is supplied');
   t.notOk(machine3.path('C'), 'should not return path pairs for a potentially cyclical transition');
-  t.deepEquals(machine3.path('D', 'C'), [ ['C', 'D'], ['D', 'C'] ], 'should return path pairs for a valid transition');
+  t.deepEquals(machine3.path('D', 'C'), [ [ 'C', 'D' ], [ 'D', 'C' ] ], 'should return path pairs for a valid transition');
 
   t.end();
 
 });
 
 test('[ factory ] - allow cyclical transitions', async t => {
-    
+
   const transitions = {
     cycle: { from: 'A', to: 'A' },
   };
@@ -156,14 +156,14 @@ test('[ factory ] - allow cyclical transitions', async t => {
   const fsm = createMachineFactory({ transitions, handlers: { onEnterA }, allowCyclicalTransitions: true });
   const machine = fsm({ state: 'A' });
   t.ok(machine.will('A'), 'should allow cyclic transitions if allowed by the machine factory');
-  t.deepEquals(machine.path('A'), [ ['A', 'A'] ], 'should return path pairs for a valid transition');
+  t.deepEquals(machine.path('A'), [ [ 'A', 'A' ] ], 'should return path pairs for a valid transition');
 
   await machine.thru('A');
 
   t.ok(onEnterA.calledOnce, 'should call the on enter A handler once');
 
   t.end();
-  
+
 });
 
 test('[ factory ] - other args', async t => {
@@ -184,6 +184,39 @@ test('[ factory ] - other args', async t => {
   await machine.to('C');
 
   t.equals(machine.beam, 'C', 'should set the correct stateKey on the machine');
+
+  t.end();
+
+});
+
+
+test('[ factory ] - shortest path', async t => {
+
+  const transitions = {
+    process: {
+      from: [ 'PENDING', 'ERRORED' ],
+      to: 'PROCESSING',
+    },
+    fail: { from: 'IN_REVIEW', to: 'FAILED' },
+    pass: {
+      from: [ 'PROCESSING', 'IN_REVIEW' ],
+      to: 'PASSED',
+    },
+    review: { from: 'PROCESSING', to: 'IN_REVIEW' },
+    error: { from: 'PROCESSING', to: 'ERRORED' },
+  };
+
+  const fsm = createMachineFactory({ transitions, stateKey: 'beam' });
+
+  const machine = fsm({ beam: 'PENDING' });
+
+  const path = await machine.path('PASSED');
+
+  t.deepEquals(path, [ [ 'PENDING', 'PROCESSING' ], [ 'PROCESSING', 'PASSED' ] ], 'should find shortest path');
+
+  await machine.thru('PASSED');
+
+  t.equals(machine.beam, 'PASSED', 'should set the correct stateKey on the machine');
 
   t.end();
 
