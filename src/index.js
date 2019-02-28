@@ -52,7 +52,7 @@ const shortestPath = (joins) => {
             : acc.concat([ [ k ].concat(arr) ]);
         }, [])
         .map(x => (console.log(x), x))
-        .sort((a, b) => a.length > b.length)
+        .sort((a, b) => (console.log(a, b, a.length, b.length), a.length > b.length))
       : [];
   }
   return (...x) => recurse(...x).shift();
