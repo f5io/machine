@@ -55,7 +55,7 @@ const shortestPath = (joins) => {
         .sort((a, b) => (console.log(a, b, a.length, b.length), a.length > b.length))
       : [];
   }
-  return (...x) => recurse(...x).shift();
+  return (...x) => recurse(...x).sort((a, b) => (console.log(a, b, a.length, b.length), a.length > b.length)).shift();
 };
 
 const createFinder = (edges) => ([ from, to ]) =>
