@@ -190,7 +190,7 @@ test('[ factory ] - other args', async t => {
 });
 
 
-test.only('[ factory ] - shortest path', async t => {
+test('[ factory ] - shortest path', async t => {
 
   const transitions = {
     process: {

@@ -46,21 +46,14 @@ const shortestPath = (joins) => {
       ? joins
         .filter(([ , v ]) => v.includes(to))
         .reduce((acc, [ k ]) => {
-          console.log(acc, from, arr);
           return k !== from
             ? acc.concat(recurse(from, k, [ to, ...visited ], [ k ].concat(arr)))
             : acc.concat([ [ k ].concat(arr) ]);
         }, [])
-        .map(x => (console.log(x), x))
-        .sort((a, b) => (console.log(a, b, a.length, b.length), a.length - b.length))
+        .sort((a, b) => a.length - b.length)
       : [];
   }
-  return (...x) => {
-    const res = recurse(...x);
-    console.log(res);
-    console.log([ 1, 2 ].shift());
-    return res.shift();
-  };
+  return (...x) => recurse(...x).shift();
 };
 
 const createFinder = (edges) => ([ from, to ]) =>
@@ -76,7 +69,7 @@ const prepareThru = (finder, allEdges, stateKey, allowCyclicalTransitions) => {
     ? getPairs(getSequence(x))
     : false;
 
-  const getPaths = compose(getPathPairs, x => (console.log('shortest', x), x), map(x => recurse(...x)), getPairs);
+  const getPaths = compose(getPathPairs, map(x => recurse(...x)), getPairs);
   const getNames = map(x => finder(x).shift());
 
   // taking into account the current state and supplied thru states, get pairs for the sequence
