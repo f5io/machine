@@ -58,6 +58,7 @@ const shortestPath = (joins) => {
   return (...x) => {
     const res = recurse(...x);
     console.log(res);
+    console.log([ 1, 2 ].shift());
     return res.shift();
   };
 };
