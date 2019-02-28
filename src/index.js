@@ -50,6 +50,7 @@ const shortestPath = (joins) => {
             ? acc.concat(recurse(from, k, [ to, ...visited ], [ k ].concat(arr)))
             : acc.concat([ [ k ].concat(arr) ]);
         }, [])
+        .map(x => (console.log(x), x))
         .sort((a, b) => a.length > b.length)
       : [];
   }
