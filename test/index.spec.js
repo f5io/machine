@@ -190,7 +190,7 @@ test('[ factory ] - other args', async t => {
 });
 
 
-test.only('[ factory ] - shortest path', async t => {
+test('[ factory ] - shortest path', async t => {
 
   const transitions = {
     process: {
@@ -211,8 +211,6 @@ test.only('[ factory ] - shortest path', async t => {
   const machine = fsm({ beam: 'PENDING' });
 
   const path = await machine.path('PASSED');
-
-  console.log(path);
 
   t.deepEquals(path, [ [ 'PENDING', 'PROCESSING' ], [ 'PROCESSING', 'PASSED' ] ], 'should find shortest path');
 

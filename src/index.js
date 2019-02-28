@@ -41,14 +41,13 @@ const guardSetter = (ctx, stateKey) =>
   });
 
 const shortestPath = (joins) => {
-  function recurse(from, to, visited = new Set(), arr = [ to ]) {
-    return !visited.has(to)
+  function recurse(from, to, visited = [], arr = [ to ]) {
+    return !visited.includes(to)
       ? joins
         .filter(([ , v ]) => v.includes(to))
         .reduce((acc, [ k ]) => {
-          visited.add(to);
           return k !== from
-            ? acc.concat(recurse(from, k, visited, [ k ].concat(arr)))
+            ? acc.concat(recurse(from, k, [ to, ...visited ], [ k ].concat(arr)))
             : acc.concat([ [ k ].concat(arr) ]);
         }, [])
         .sort((a, b) => a.length > b.length)
@@ -64,7 +63,7 @@ const createFinder = (edges) => ([ from, to ]) =>
 const prepareThru = (finder, allEdges, stateKey, allowCyclicalTransitions) => {
   const joins = getJoins(allEdges);
   const recurse = shortestPath(joins);
- 
+
   // if a path is found, get pairs of the sequence, ie. [ [ A, B ], [ B, C ] ]
   const getPathPairs = x => !x.some(y => y === undefined)
     ? getPairs(getSequence(x))
