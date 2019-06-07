@@ -1,6 +1,11 @@
 .DS_Store
+*.log
+
+./index.js
+./utils/
+
 .nyc_output/
 coverage/
 node_modules/
-*.log
+dist/
 

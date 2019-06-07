@@ -1,5 +1,14 @@
 .nyc_output/
-assets/
-ci/
+.circleci/
 coverage/
+assets/
+dist/
 test/
+src/
+ci/
+tsconfig.json
+tsconfig.build.json
+yarn.lock
+package-lock.json
+.nycrc
+.prettierrc
