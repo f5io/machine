@@ -1,12 +1,17 @@
-const test = require('tape');
-const sinon = require('sinon');
-const createMachineFactory = require('../');
+import * as test from 'tape';
+import * as tapSpec from 'tap-spec';
+import * as sinon from 'sinon';
+import createMachineFactory from '../src';
+
+test
+  .createStream()
+  .pipe(tapSpec())
+  .pipe(process.stdout);
 
 test('[ factory ] - simple state machine', async t => {
-
   const transitions = {
-    init: { from: [ 'A', 'B' ], to: 'C' },
-    reset: { from: [ 'B', 'C' ], to: 'A' },
+    init: { from: ['A', 'B'], to: 'C' },
+    reset: { from: ['B', 'C'], to: 'A' }
   };
 
   const onEnterA = ctx => (ctx.foo = 'bar');
@@ -15,19 +20,38 @@ test('[ factory ] - simple state machine', async t => {
 
   const handlers = { onEnterA, onLeaveA, onEnterC };
 
-  const fsm = createMachineFactory({ transitions, handlers });
+  const fsm = createMachineFactory<{ state: string; foo?: string }, 'init' | 'reset'>({
+    transitions,
+    handlers
+  });
 
-  t.throws(() => fsm({ state: 'D' }), /Invalid initial state/, 'should throw an error when initializing with an invalid state');
-  t.throws(() => fsm(), /Invalid initial state/, 'should throw an error when initializing with an invalid state');
+  t.throws(
+    () => fsm({ state: 'D' }),
+    /Invalid initial state/,
+    'should throw an error when initializing with an invalid state'
+  );
+  t.throws(
+    // @ts-ignore
+    () => fsm(),
+    /You need to provide an initial state./,
+    'should throw an error when initializing with an invalid state'
+  );
 
   const machine = fsm({ state: 'A' });
-
   t.ok(machine.can('C'), 'should return true for a transition that it can perform');
   t.notOk(machine.can('D'), 'should return false for a transition that it cannot perform');
 
-  t.throws(() => machine.state = 'C', /Missing lock/, 'should not be able to set the machines state directly');
+  t.throws(
+    () => (machine.state = 'C'),
+    /Missing lock/,
+    'should not be able to set the machines state directly'
+  );
 
-  t.deepEquals(machine.transitions(), [ 'init' ], 'should return a list of available transitions from the current state');
+  t.deepEquals(
+    machine.transitions(),
+    ['init'],
+    'should return a list of available transitions from the current state'
+  );
 
   await machine.to('C');
 
@@ -44,25 +68,28 @@ test('[ factory ] - simple state machine', async t => {
   t.throws(() => machine.edge('B'), /Invalid edge/, 'should error on and invalid edge request');
 
   try {
+    // @ts-ignore
     await machine.reset();
     t.fail('should not allow the reset transition');
-  } catch(e) {
+  } catch (e) {
     t.equals(e.message, 'Invalid transition', 'should throw an error not allowing the transition');
   }
 
   const machine2 = fsm({ state: 'B' });
-  t.deepEquals(machine2.transitions(), [ 'init', 'reset' ], 'should contain all available transitions');
+  t.deepEquals(
+    machine2.transitions(),
+    ['init', 'reset'],
+    'should contain all available transitions'
+  );
 
   t.end();
-
 });
 
 test('[ factory ] - handler order', async t => {
-
   const transitions = {
     init: { from: 'A', to: 'B' },
-    effect: { from: [ 'A', 'B', 'D' ], to: 'C' },
-    dispute: { from: 'C', to: 'D' },
+    effect: { from: ['A', 'B', 'D'], to: 'C' },
+    dispute: { from: 'C', to: 'D' }
   };
 
   const append = val => ctx => ctx.order.push(val);
@@ -72,42 +99,38 @@ test('[ factory ] - handler order', async t => {
     onInit: append('onInit'),
     onEnterB: append('onEnterB'),
     onB: append('onB'),
-    onAfterInit: append('onAfterInit'),
+    onAfterInit: append('onAfterInit')
   };
 
-  const fsm = createMachineFactory({ transitions, handlers });
+  const fsm = createMachineFactory<
+    { state: string; order: string[] },
+    'init' | 'effect' | 'dispute'
+  >({ transitions, handlers });
   const machine = fsm({ state: 'A', order: [] });
-
-  const expectedOrder = [
-    'onBeforeInit',
-    'onLeaveA',
-    'onInit',
-    'onEnterB',
-    'onB',
-    'onAfterInit',
-  ];
+  const expectedOrder = ['onBeforeInit', 'onLeaveA', 'onInit', 'onEnterB', 'onB', 'onAfterInit'];
 
   await machine.to('B');
-
+  console.dir(machine, { depth: null });
   t.deepEquals(machine.order, expectedOrder, 'life-cycle hooks should happen in the correct order');
 
   t.end();
-
 });
 
 test('[ factory ] - thru mechanisms', async t => {
-
   const transitions = {
     init: { from: 'A', to: 'B' },
-    effect: { from: [ 'A', 'B', 'D' ], to: 'C' },
-    dispute: { from: 'C', to: 'D' },
+    effect: { from: ['A', 'B', 'D'], to: 'C' },
+    dispute: { from: 'C', to: 'D' }
   };
 
   const onInit = sinon.spy();
   const onEffect = sinon.spy();
   const onDispute = sinon.spy();
 
-  const fsm = createMachineFactory({ transitions, handlers: { onInit, onEffect, onDispute } });
+  const fsm = createMachineFactory<{ state: string }, 'init' | 'effect' | 'dispute'>({
+    transitions,
+    handlers: { onInit, onEffect, onDispute }
+  });
   const machine = fsm({ state: 'A' });
 
   t.ok(machine.will('D'), 'should be able to transition thru to D');
@@ -136,88 +159,106 @@ test('[ factory ] - thru mechanisms', async t => {
 
   const machine3 = fsm({ state: 'C' });
   t.notOk(machine3.will('C'), 'should not allow a potential cyclic transition');
-  t.throws(() => machine3.thru('C'), /Potential cyclic transition/, 'should throw a potential cyclic transition');
-  t.ok(machine3.will('D', 'C'), 'should be able to do a cyclic transition if an extra node is supplied');
+  t.throws(
+    () => machine3.thru('C'),
+    /Potential cyclic transition/,
+    'should throw a potential cyclic transition'
+  );
+  t.ok(
+    machine3.will('D', 'C'),
+    'should be able to do a cyclic transition if an extra node is supplied'
+  );
   t.notOk(machine3.path('C'), 'should not return path pairs for a potentially cyclical transition');
-  t.deepEquals(machine3.path('D', 'C'), [ [ 'C', 'D' ], [ 'D', 'C' ] ], 'should return path pairs for a valid transition');
+  t.deepEquals(
+    machine3.path('D', 'C'),
+    [['C', 'D'], ['D', 'C']],
+    'should return path pairs for a valid transition'
+  );
 
   t.end();
-
 });
 
 test('[ factory ] - allow cyclical transitions', async t => {
-
   const transitions = {
-    cycle: { from: 'A', to: 'A' },
+    cycle: { from: 'A', to: 'A' }
   };
 
   const onEnterA = sinon.spy();
 
-  const fsm = createMachineFactory({ transitions, handlers: { onEnterA }, allowCyclicalTransitions: true });
+  const fsm = createMachineFactory<{ state: string }, 'cycle'>({
+    transitions,
+    handlers: { onEnterA },
+    allowCyclicalTransitions: true
+  });
   const machine = fsm({ state: 'A' });
   t.ok(machine.will('A'), 'should allow cyclic transitions if allowed by the machine factory');
-  t.deepEquals(machine.path('A'), [ [ 'A', 'A' ] ], 'should return path pairs for a valid transition');
+  t.deepEquals(machine.path('A'), [['A', 'A']], 'should return path pairs for a valid transition');
 
   await machine.thru('A');
 
   t.ok(onEnterA.calledOnce, 'should call the on enter A handler once');
 
   t.end();
-
 });
 
 test('[ factory ] - other args', async t => {
-
   const transitions = {
-    init: { from: [ 'A', 'B' ], to: 'C' },
-    reset: { from: [ 'B', 'C' ], to: 'A' },
+    init: { from: ['A', 'B'], to: 'C' },
+    reset: { from: ['B', 'C'], to: 'A' }
   };
 
-  t.throws(() => createMachineFactory(), /No transitions supplied/, 'should error as no transitions are supplied to factory');
+  t.throws(
+    () => createMachineFactory(),
+    /No transitions supplied/,
+    'should error as no transitions are supplied to factory'
+  );
 
-  const fsm = createMachineFactory({ transitions, stateKey: 'beam' });
+  const fsm = createMachineFactory<{ beam: string }, 'init' | 'reset'>({
+    transitions,
+    stateKey: 'beam'
+  });
 
-  t.throws(() => fsm({ state: 'A' }), /Invalid initial state/, 'should error as not state is supplied on the stateKey');
+  t.throws(
+    // @ts-ignore
+    () => fsm({ state: 'A' }),
+    /Invalid initial state/,
+    'should error as not state is supplied on the stateKey'
+  );
 
   const machine = fsm({ beam: 'A' });
-
   await machine.to('C');
-
   t.equals(machine.beam, 'C', 'should set the correct stateKey on the machine');
 
   t.end();
-
 });
 
-
 test('[ factory ] - shortest path', async t => {
-
+  type Keys = 'process' | 'fail' | 'pass' | 'review' | 'error';
   const transitions = {
     process: {
-      from: [ 'PENDING', 'ERRORED' ],
-      to: 'PROCESSING',
+      from: ['PENDING', 'ERRORED'],
+      to: 'PROCESSING'
     },
     fail: { from: 'IN_REVIEW', to: 'FAILED' },
     pass: {
-      from: [ 'PROCESSING', 'IN_REVIEW' ],
-      to: 'PASSED',
+      from: ['PROCESSING', 'IN_REVIEW'],
+      to: 'PASSED'
     },
     review: { from: 'PROCESSING', to: 'IN_REVIEW' },
-    error: { from: 'PROCESSING', to: 'ERRORED' },
+    error: { from: 'PROCESSING', to: 'ERRORED' }
   };
 
-  const fsm = createMachineFactory({ transitions, stateKey: 'beam' });
+  const fsm = createMachineFactory<{ beam: string }, Keys>({ transitions, stateKey: 'beam' });
 
   const machine = fsm({ beam: 'PENDING' });
-
   const path = await machine.path('PASSED');
-
-  t.deepEquals(path, [ [ 'PENDING', 'PROCESSING' ], [ 'PROCESSING', 'PASSED' ] ], 'should find shortest path');
-
+  t.deepEquals(
+    path,
+    [['PENDING', 'PROCESSING'], ['PROCESSING', 'PASSED']],
+    'should find shortest path'
+  );
   await machine.thru('PASSED');
-
   t.equals(machine.beam, 'PASSED', 'should set the correct stateKey on the machine');
 
   t.end();
-
 });
