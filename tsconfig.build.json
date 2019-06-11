@@ -11,7 +11,8 @@
     "noImplicitUseStrict": true,
     "downlevelIteration": true,
     "declaration": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "outDir": "./"
   },
   "include": ["src"],
   "exclude": ["test", "node_modules"]
