@@ -10,6 +10,11 @@
   "engines": {
     "node": ">=7.4"
   },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "utils"
+  ],
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
     "test": "nyc --check-coverage --lines 100 --functions 100 --branches 100 tape -r ts-node/register ./test/index.spec.ts",
