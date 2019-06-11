@@ -1,6 +1,6 @@
 {
   "name": "@paybase/machine",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "async/await finite state machine factory",
   "main": "index.js",
   "typings": "index.d.ts",
