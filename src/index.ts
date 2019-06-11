@@ -219,3 +219,6 @@ const createMachineFactory = <C extends object, T extends string>({
 };
 
 export default createMachineFactory;
+// this is why ts kinda sucks
+module.exports = createMachineFactory;
+createMachineFactory.default = createMachineFactory;
