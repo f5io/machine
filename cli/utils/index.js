@@ -3,7 +3,7 @@ const css = require('css-to-object');
 const program = require('commander');
 const { resolve, extname } = require('path');
 const { readFileSync, writeFileSync, statSync } = require('fs');
-const { getStates, getEdges, compose, map } = require('../../src/utils');
+const { getStates, getEdges, compose, map } = require('../../utils');
 
 const _edges = Symbol.for('@@fsm/edges');
 const _states = Symbol.for('@@fsm/states');

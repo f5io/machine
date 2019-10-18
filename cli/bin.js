@@ -8,7 +8,7 @@ const {
   writeOut
 } = require('./utils');
 const pkg = require('../package.json');
-const { compose } = require('../src/utils');
+const { compose } = require('../utils');
 
 program
   .name('visualise')
