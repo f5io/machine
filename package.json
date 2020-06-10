@@ -1,5 +1,5 @@
 {
-  "name": "@paybase/machine",
+  "name": "@f5io/machine",
   "version": "1.0.12",
   "description": "async/await finite state machine factory",
   "main": "index.js",

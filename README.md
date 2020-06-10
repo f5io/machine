@@ -1,21 +1,21 @@
-# @paybase/machine
+# @f5io/machine
 
 An asynchronous finite state machine library for Node.js and the browser.
 
-[![npm version](https://badge.fury.io/js/%40paybase%2Fmachine.svg)](https://badge.fury.io/js/%40paybase%2Fmachine)
+[![npm version](https://badge.fury.io/js/%40f5io%2Fmachine.svg)](https://badge.fury.io/js/%40f5io%2Fmachine)
 
 ## Installation
 
 This library requires `async/await` and `Proxy` support in your Node.js runtime, so ideally `node>=7.4`.
 
 ```
-$ npm install --save @paybase/machine
+$ npm install --save @f5io/machine
 ```
 
 or
 
 ```
-$ yarn add @paybase/machine
+$ yarn add @f5io/machine
 ```
 
 ## Concepts
