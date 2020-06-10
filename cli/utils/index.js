@@ -83,7 +83,7 @@ const getDotFromInput = exitOnError(({ input, styles, graph = 'fsm' }) => {
   switch (ext) {
     case '.js':
       const fjs = require(resolve(process.cwd(), input));
-      if (fjs[_edges] && fsj[_states]) {
+      if (fjs[_edges] && fjs[_states]) {
         return fsmToDot({ edges: fjs[_edges], states: fjs[_states], styles, name: graph });
       } else {
         validateJSON(fjs);
