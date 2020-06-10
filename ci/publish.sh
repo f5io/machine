@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -x
 
 not_exists() {
   [ -z "${!1}" ]
