@@ -1,6 +1,6 @@
 {
   "name": "@f5io/machine",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "async/await finite state machine factory",
   "main": "index.js",
   "typings": "index.d.ts",
